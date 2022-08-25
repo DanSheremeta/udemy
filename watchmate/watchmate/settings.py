@@ -114,7 +114,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 """
 superuser:
-    username: super-admin
+    username: super-admin/danyl
     email: 
     password: password
 """
