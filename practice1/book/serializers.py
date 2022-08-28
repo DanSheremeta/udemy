@@ -18,11 +18,11 @@ class BookSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
-        instance.name = validated_data.get('genre', instance.genre)
-        instance.name = validated_data.get('language', instance.language)
-        instance.name = validated_data.get('author', instance.author)
+        instance.genre = validated_data.get('genre', instance.genre)
+        instance.language = validated_data.get('language', instance.language)
+        instance.author = validated_data.get('author', instance.author)
         instance.description = validated_data.get('description', instance.description)
-        instance.activate = validated_data.get('date_of_publication', instance.date_of_publication)
-        instance.activate = validated_data.get('date_of_writing', instance.date_of_writing)
+        instance.date_of_publication = validated_data.get('date_of_publication', instance.date_of_publication)
+        instance.date_of_writing = validated_data.get('date_of_writing', instance.date_of_writing)
         instance.save()
         return instance
