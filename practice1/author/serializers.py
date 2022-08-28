@@ -3,7 +3,6 @@ from rest_framework import serializers
 from .models import *
 
 
-# https://www.django-rest-framework.org/api-guide/fields/
 class AuthorSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField()
