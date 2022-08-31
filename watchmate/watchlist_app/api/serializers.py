@@ -1,11 +1,16 @@
 from rest_framework import serializers
 
-from ..models import *
+from ..models import Movie
+
+
+def name_len(value):
+    if len(value) < 2:
+        raise serializers.ValidationError('Name cannot be more than 2 characters')
 
 
 class MovieSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField()
+    name = serializers.CharField(validators=[name_len])
     description = serializers.CharField()
     activate = serializers.BooleanField()
 
@@ -18,3 +23,17 @@ class MovieSerializer(serializers.Serializer):
         instance.activate = validated_data.get('activate', instance.activate)
         instance.save()
         return instance
+
+    def validate(self, data):
+
+        if data['name'] == data['description']:
+            raise serializers.ValidationError("Name and Description should be different")
+        else:
+            return data
+
+    # def validate_name(self, value):
+    #
+    #     if len(value) < 3:
+    #         raise serializers.ValidationError('Name cannot be more than 3 characters')
+    #     else:
+    #         return value
