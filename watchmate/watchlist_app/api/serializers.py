@@ -4,6 +4,7 @@ from ..models import Movie
 
 
 class MovieSerializer(serializers.ModelSerializer):
+    len_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
@@ -11,15 +12,16 @@ class MovieSerializer(serializers.ModelSerializer):
         # fields = ('id', 'name', 'description', 'activate')
         # exclude = ('id')
 
-    def validate(self, data):
+    def get_len_name(self, obj):
+        return len(obj.name)
 
+    def validate(self, data):
         if data['name'] == data['description']:
             raise serializers.ValidationError("Name and Description should be different")
         else:
             return data
 
     def validate_name(self, value):
-
         if len(value) < 3:
             raise serializers.ValidationError('Name cannot be more than 3 characters')
         else:
