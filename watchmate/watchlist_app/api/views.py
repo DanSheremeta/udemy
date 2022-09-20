@@ -49,7 +49,7 @@ class StreamPlatformAV(APIView):
 
     def get(self, request):
         streamings = StreamPlatform.objects.all()
-        serializer = StreamPlatformSerializer(streamings, many=True)
+        serializer = StreamPlatformSerializer(streamings, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request):
