@@ -24,6 +24,7 @@ class WatchListSerializer(serializers.ModelSerializer):
 
 class StreamPlatformSerializer(serializers.ModelSerializer):
     watchlist = WatchListSerializer(many=True, read_only=True)
+
     # watchlist = serializers.StringRelatedField(many=True)
     # watchlist = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     # watchlist = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='watch-list-details')
@@ -31,7 +32,6 @@ class StreamPlatformSerializer(serializers.ModelSerializer):
     class Meta:
         model = StreamPlatform
         fields = "__all__"
-
 
     # def get_len_name(self, obj):
     #     return len(obj.name)
@@ -47,7 +47,6 @@ class StreamPlatformSerializer(serializers.ModelSerializer):
     #         raise serializers.ValidationError('Name cannot be more than 3 characters')
     #     else:
     #         return value
-
 
 # def name_len(value):
 #     if len(value) < 2:
