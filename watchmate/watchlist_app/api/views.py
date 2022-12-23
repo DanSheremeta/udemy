@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 # from django.shortcuts import get_object_or_404
 
-from .permissions import AdminOrReadOnly, ReviewUserOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsReviewUserOrReadOnly
 from ..models import WatchList, StreamPlatform, Review
 from .serializers import WatchListSerializer, StreamPlatformSerializer, ReviewSerializer
 
@@ -43,7 +43,7 @@ class ReviewCreate(generics.CreateAPIView):
 class ReviewList(generics.ListAPIView):
     # queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [AdminOrReadOnly]
+    # permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         pk = self.kwargs['pk']
@@ -53,12 +53,13 @@ class ReviewList(generics.ListAPIView):
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [ReviewUserOrReadOnly]
+    permission_classes = [IsReviewUserOrReadOnly]
 
 
 class StreamPlatformVS(viewsets.ModelViewSet):
     queryset = StreamPlatform.objects.all()
     serializer_class = StreamPlatformSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
 # class StreamPlatformVS(viewsets.ViewSet):
@@ -118,6 +119,7 @@ class StreamPlatformVS(viewsets.ModelViewSet):
 
 
 class WatchListAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
 
     def get(self, request):
         movies = WatchList.objects.all()
@@ -133,6 +135,7 @@ class WatchListAV(APIView):
 
 
 class WatchListDetailAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
 
     def get(self, request, pk):
         try:
