@@ -28,13 +28,14 @@ def registration_view(request):
             data['response'] = 'Registration successful'
             data['username'] = user.username
             data['email'] = user.email
-            # data['token'] = Token.objects.get(user=user).key
-            refresh = RefreshToken.for_user(user)
+            data['token'] = Token.objects.get(user=user).key
 
-            data['token'] = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
+            # refresh = RefreshToken.for_user(user)
+            #
+            # data['token'] = {
+            #     'refresh': str(refresh),
+            #     'access': str(refresh.access_token),
+            # }
         else:
             data = serializer.errors
 

@@ -5,6 +5,7 @@ from rest_framework import status, generics
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 # from django.shortcuts import get_object_or_404
 
 from .permissions import IsAdminOrReadOnly, IsReviewUserOrReadOnly
@@ -44,6 +45,7 @@ class ReviewList(generics.ListAPIView):
     # queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     # permission_classes = [IsAuthenticated]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def get_queryset(self):
         pk = self.kwargs['pk']
@@ -54,6 +56,7 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsReviewUserOrReadOnly]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
 
 class StreamPlatformVS(viewsets.ModelViewSet):
