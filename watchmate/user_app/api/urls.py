@@ -11,7 +11,6 @@ urlpatterns = [
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
     # path('login/', obtain_auth_token, name='login'),
-    # path('sign-in/', registration_view, name='sign-in'),
+    path('sign-in/', registration_view, name='sign-in'),
     # path('logout/', logout_view, name='logout'),
-
 ]
