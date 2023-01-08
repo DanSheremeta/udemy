@@ -140,16 +140,16 @@ class StreamPlatformVS(viewsets.ModelViewSet):
 #         return Response(serializer.data)
 
 
-class MovieList(generics.ListAPIView):
+class WatchListGV(generics.ListAPIView):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_fields = ['title', 'platform__name', 'avg_rating', 'active']
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['title', 'platform__name', 'avg_rating', 'active']
     # filter_backends = [SearchFilter]
     # search_fields = ['title', 'platform__name']
-    filter_backends = [OrderingFilter]
-    search_fields = ['avg_rating']
+    # filter_backends = [OrderingFilter]
+    # search_fields = ['avg_rating']
 
 
 class WatchListAV(APIView):

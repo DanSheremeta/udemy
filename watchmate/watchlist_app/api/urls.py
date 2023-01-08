@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import (WatchListDetailAV, WatchListAV, ReviewList, MovieList,
+from .views import (WatchListDetailAV, WatchListAV, ReviewList, WatchListGV,
                     ReviewDetail, ReviewCreate, StreamPlatformVS, UserReview)
 from rest_framework.routers import DefaultRouter
 
@@ -10,7 +10,7 @@ router.register('stream', StreamPlatformVS, basename='streamplatform')
 urlpatterns = [
     path('list/', WatchListAV.as_view(), name='watch-list'),
     path('<int:pk>/', WatchListDetailAV.as_view(), name='watch-list-details'),
-    path('new-list/', MovieList.as_view(), name='new-watch-list'),
+    path('new-list/', WatchListGV.as_view(), name='new-watch-list'),
 
     path('', include(router.urls)),
 
