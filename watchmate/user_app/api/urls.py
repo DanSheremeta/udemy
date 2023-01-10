@@ -1,5 +1,5 @@
 from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView, TokenVerifyView
+# from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView, TokenVerifyView
 
 from .views import registration_view, logout_view
 from django.urls import path

@@ -17,16 +17,26 @@ from .pagination import WatchListPagination, WatchListLimitOffsetPagination, Wat
 from .throttling import ReviewListThrottle, ReviewCreateThrottle
 
 
-class UserReview(generics.ListAPIView):
+# Review Views
+class ReviewList(generics.ListAPIView):
+    # queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-
-    # def get_queryset(self):
-    #     username = self.kwargs['username']
-    #     return Review.objects.filter(review_user__username=username)
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    throttle_classes = [ReviewListThrottle, AnonRateThrottle]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['review_user__username', 'active']
 
     def get_queryset(self):
-        username = self.request.query_params.get('username', None)
-        return Review.objects.filter(review_user__username=username)
+        pk = self.kwargs['pk']
+        return Review.objects.filter(watchlist=pk)
+
+
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [IsReviewUserOrReadOnly]
+    throttle_classes = [ScopedRateThrottle]
+    # throttle_scope = 'review-detail'
 
 
 class ReviewCreate(generics.CreateAPIView):
@@ -58,32 +68,79 @@ class ReviewCreate(generics.CreateAPIView):
         serializer.save(watchlist=movie, review_user=review_user)
 
 
-class ReviewList(generics.ListAPIView):
-    # queryset = Review.objects.all()
+class UserReview(generics.ListAPIView):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    throttle_classes = [ReviewListThrottle, AnonRateThrottle]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['review_user__username', 'active']
+
+    # def get_queryset(self):
+    #     username = self.kwargs['username']
+    #     return Review.objects.filter(review_user__username=username)
 
     def get_queryset(self):
-        pk = self.kwargs['pk']
-        return Review.objects.filter(watchlist=pk)
+        username = self.request.query_params.get('username', None)
+        return Review.objects.filter(review_user__username=username)
 
 
-class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-    permission_classes = [IsReviewUserOrReadOnly]
-    throttle_classes = [ScopedRateThrottle]
-    # throttle_scope = 'review-detail'
+# Watch List Views
+class WatchListGV(generics.ListAPIView):
+    queryset = WatchList.objects.all()
+    serializer_class = WatchListSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = WatchListPagination
+
+    # filter_backends = [DjangoFilterBackend]
+    # filterset_fields = ['title', 'platform__name', 'avg_rating', 'active']
+    # filter_backends = [SearchFilter]
+    # search_fields = ['title', 'platform__name']
+    filter_backends = [OrderingFilter]
+    ordering_fields = ['-avg_rating']
 
 
+class WatchListAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get(self, request):
+        movies = WatchList.objects.all()
+        serializer = WatchListSerializer(movies, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = WatchListSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WatchListDetailAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get(self, request, pk):
+        try:
+            movie = WatchList.objects.get(pk=pk)
+            serializer = WatchListSerializer(movie)
+            return Response(serializer.data)
+        except WatchList.DoesNotExist:
+            return Response({'Error': 'Movie is not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, pk):
+        movie = WatchList.objects.get(pk=pk)
+        serializer = WatchListSerializer(movie, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        movie = WatchList.objects.get(pk=pk)
+        movie.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Stream Platform Views
 class StreamPlatformVS(viewsets.ModelViewSet):
     queryset = StreamPlatform.objects.all()
     serializer_class = StreamPlatformSerializer
     permission_classes = [IsAdminOrReadOnly]
-
 
 # class StreamPlatformVS(viewsets.ViewSet):
 #
@@ -139,63 +196,8 @@ class StreamPlatformVS(viewsets.ModelViewSet):
 #         movie = get_object_or_404(queryset, pk=pk)
 #         serializer = WatchListSerializer(movie)
 #         return Response(serializer.data)
-
-
-class WatchListGV(generics.ListAPIView):
-    queryset = WatchList.objects.all()
-    serializer_class = WatchListSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    pagination_class = WatchListCursorPagination
-
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_fields = ['title', 'platform__name', 'avg_rating', 'active']
-    # filter_backends = [SearchFilter]
-    # search_fields = ['title', 'platform__name']
-    # filter_backends = [OrderingFilter]
-    # ordering_fields = ['avg_rating']
-
-
-class WatchListAV(APIView):
-    permission_classes = [IsAdminOrReadOnly]
-
-    def get(self, request):
-        movies = WatchList.objects.all()
-        serializer = WatchListSerializer(movies, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = WatchListSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class WatchListDetailAV(APIView):
-    permission_classes = [IsAdminOrReadOnly]
-
-    def get(self, request, pk):
-        try:
-            movie = WatchList.objects.get(pk=pk)
-            serializer = WatchListSerializer(movie)
-            return Response(serializer.data)
-        except WatchList.DoesNotExist:
-            return Response({'Error': 'Movie is not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    def put(self, request, pk):
-        movie = WatchList.objects.get(pk=pk)
-        serializer = WatchListSerializer(movie, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        movie = WatchList.objects.get(pk=pk)
-        movie.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
+#
+#
 # class StreamPlatformAV(APIView):
 #
 #     def get(self, request):

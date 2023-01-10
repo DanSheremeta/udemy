@@ -17,6 +17,6 @@ class WatchListLimitOffsetPagination(LimitOffsetPagination):
 
 
 class WatchListCursorPagination(CursorPagination):
-    page_size = 3
+    page_size = 7
     ordering = '-avg_rating'
     # cursor_query_param = 'record'
