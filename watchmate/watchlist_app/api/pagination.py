@@ -2,11 +2,11 @@ from rest_framework.pagination import PageNumberPagination, LimitOffsetPaginatio
 
 
 class WatchListPagination(PageNumberPagination):
-    page_size = 7
-    page_query_param = 'p'
-    page_size_query_param = 'page_size'
+    page_size = 10
+    # page_query_param = 'p'
+    # page_size_query_param = 'page_size'
     max_page_size = 50
-    last_page_strings = 'end'
+    # last_page_strings = 'end'
 
 
 class WatchListLimitOffsetPagination(LimitOffsetPagination):

@@ -87,11 +87,9 @@ class WatchListGV(generics.ListAPIView):
     # permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = WatchListPagination
 
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_fields = ['title', 'platform__name', 'avg_rating', 'active']
-    # filter_backends = [SearchFilter]
-    # search_fields = ['title', 'platform__name']
-    filter_backends = [OrderingFilter]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    filterset_fields = ['title', 'platform__name', 'avg_rating', 'active']
+    search_fields = ['title', 'platform__name']
     ordering_fields = ['-avg_rating']
 
 
