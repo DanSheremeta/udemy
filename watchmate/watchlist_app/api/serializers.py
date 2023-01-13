@@ -22,6 +22,15 @@ class WatchListSerializer(serializers.ModelSerializer):
         # fields = ('id', 'name', 'description', 'activate')
         # exclude = ('id')
 
+    def create(self, validated_data):
+        validated_data['platform'] = StreamPlatform.objects.get(name=validated_data['platform']['name'])
+        return WatchList.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data['platform'] = StreamPlatform.objects.get(name=validated_data['platform']['name'])
+        instance = super(WatchListSerializer, self).update(instance, validated_data)
+        return instance
+
 
 class StreamPlatformSerializer(serializers.ModelSerializer):
     # watchlist = WatchListSerializer(many=True, read_only=True)

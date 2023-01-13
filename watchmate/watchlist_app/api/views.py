@@ -84,7 +84,7 @@ class UserReview(generics.ListAPIView):
 class WatchListGV(generics.ListAPIView):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    # permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = WatchListPagination
 
     # filter_backends = [DjangoFilterBackend]
@@ -107,7 +107,7 @@ class WatchListAV(APIView):
         serializer = WatchListSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
