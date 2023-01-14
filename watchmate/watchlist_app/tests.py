@@ -74,6 +74,10 @@ class WatchListTestCase(APITestCase):
         self.token = Token.objects.get(user__username='test_superuser')
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
+    def test_wl_new_list(self):
+        response = self.client.get(reverse('new-watch-list'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_wl_list(self):
         response = self.client.get(reverse('watch-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -97,8 +101,82 @@ class WatchListTestCase(APITestCase):
         response = self.client.put(reverse('watch-list-details', args=(1,)), self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(WatchList.objects.get(id=1).title, 'test title - new')
+        self.assertEqual(WatchList.objects.get(id=1).storyline, 'test storyline - new')
 
     def test_wl_delete(self):
         response = self.client.delete(reverse('watch-list-details', args=(1,)))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(WatchList.objects.count(), 0)
+
+
+class ReviewTestCase(APITestCase):
+
+    def setUp(self):
+        self.stream = StreamPlatform.objects.create(name='test sp', about='test about sp',
+                                                    website='https://www.test.com/')
+        self.watchlist1 = WatchList.objects.create(title='test title 1', storyline='test storyline 1',
+                                                   active=True, platform=self.stream,)
+        self.watchlist2 = WatchList.objects.create(title='test title 2', storyline='test storyline 2',
+                                                   active=True, platform=self.stream,)
+        self.user = User.objects.create_user(username='test', password='password')
+        self.token = Token.objects.get(user__username=self.user.username)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        self.data = {
+            'review_user': self.user,
+            'rating': 3,
+            'desc': 'test desc',
+            'watchlist': self.watchlist1,
+            'active': True,
+        }
+        self.review = Review.objects.create(**self.data)
+
+    def test_review_create(self):
+        self.data['rating'] = 5
+        self.data['desc'] += ' - new'
+        self.data['watchlist'] = self.watchlist2
+        response = self.client.post(reverse('review-create', args=(self.watchlist2.id,)), self.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Review.objects.get(id=self.watchlist2.id).rating, 5)
+        self.assertEqual(Review.objects.get(id=self.watchlist2.id).desc, 'test desc - new')
+        self.assertEqual(Review.objects.count(), 2)
+
+        response = self.client.post(reverse('review-create', args=(self.watchlist2.id,)), self.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_review_create_unauth(self):
+        self.client.force_authenticate(user=None, token=None)
+        response = self.client.post(reverse('review-create', args=(self.watchlist2.id,)), self.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_review_change(self):
+        self.data['rating'] = 2
+        self.data['desc'] += ' - new'
+        self.data['active'] = False
+        response = self.client.put(reverse('review-detail', args=(self.review.id,)), self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Review.objects.count(), 1)
+        self.assertEqual(Review.objects.get(id=self.watchlist1.id).rating, 2)
+        self.assertEqual(Review.objects.get(id=self.watchlist1.id).desc, 'test desc - new')
+        self.assertEqual(Review.objects.get(id=self.watchlist1.id).active, False)
+
+    def test_review_list(self):
+        response = self.client.get(reverse('review-list', args=(self.watchlist1.id,)), self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(Review.objects.count(), 1)
+
+    def test_review_by_id(self):
+        response = self.client.get(reverse('review-detail', args=(self.review.id,)), self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['rating'], 3)
+        self.assertEqual(response.data['desc'], 'test desc')
+        self.assertEqual(response.data['active'], True)
+
+    def test_review_delete(self):
+        response = self.client.delete(reverse('review-detail', args=(self.review.id,)))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Review.objects.count(), 0)
+
+    def test_user_review(self):
+        response = self.client.get('/watch/reviews/?username=' + self.user.username)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
