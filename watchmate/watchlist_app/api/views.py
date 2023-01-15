@@ -18,9 +18,9 @@ class ReviewList(generics.ListAPIView):
     # queryset = Review.objects.all()
     serializer_class = serializers.ReviewSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    throttle_classes = [throttling.ReviewListThrottle, AnonRateThrottle]
+    throttle_classes = [throttling.ReviewLisThrottle, AnonRateThrottle]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['review_user__username', 'active']
+    filterset_fields = ['review_user__username']
 
     def get_queryset(self):
         pk = self.kwargs['pk']
@@ -84,13 +84,13 @@ class WatchListGV(generics.ListAPIView):
     pagination_class = pagination.WatchListPagination
 
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
-    filterset_fields = ['title', 'platform__name', 'avg_rating', 'active']
+    filterset_fields = ['title', 'platform__name', 'avg_rating']
     search_fields = ['title', 'platform__name']
     ordering_fields = ['-avg_rating']
 
 
 class WatchListAV(APIView):
-    permission_classes = [permissions.IsAdminOrReadOnly]
+    # permission_classes = [permissions.IsAdminOrReadOnly]
 
     def get(self, request):
         movies = models.WatchList.objects.all()
