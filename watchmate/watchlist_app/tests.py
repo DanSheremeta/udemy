@@ -74,10 +74,6 @@ class WatchListTestCase(APITestCase):
         self.token = Token.objects.get(user__username='test_superuser')
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
-    def test_wl_new_list(self):
-        response = self.client.get(reverse('new-watch-list'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
     def test_wl_list(self):
         response = self.client.get(reverse('watch-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -178,5 +174,5 @@ class ReviewTestCase(APITestCase):
         self.assertEqual(Review.objects.count(), 0)
 
     def test_user_review(self):
-        response = self.client.get('/watch/reviews/?username=' + self.user.username)
+        response = self.client.get('/api/movies/user-reviews/?username=' + self.user.username)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
